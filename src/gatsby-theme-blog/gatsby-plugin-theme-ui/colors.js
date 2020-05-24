@@ -2,7 +2,7 @@ import merge from "lodash.merge";
 import defaultThemeColors from "gatsby-theme-blog/src/gatsby-plugin-theme-ui/colors";
 
 export default merge({}, defaultThemeColors, {
-  text: "rgba(0,0,0,0.9)",
+  text: "#333",
   primary: "#ef6351",
   background: "#fff",
   modes: {
