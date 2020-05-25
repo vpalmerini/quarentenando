@@ -1,0 +1,90 @@
+---
+title: Escrevendo um bom README
+date: "2020-05-25"
+---
+
+Quem nunca, depois de terminar uma primeira versão de um projeto, por exemplo, deixou de criar ou completar
+o **README** por não achá-lo relevante ou até mesmo por não saber o que colocar nesse tipo de documento? Ou que viu uma biblioteca legal pra usar em um outro projeto mas sofreu pra configurá-la por causa de uma documentação incompleta?
+
+Pois é, isso parece ser uma prática mais comum do que parece (e do que deveria). O **README** é o primeiro
+contato que qualquer pessoa leiga ao projeto terá (_está no nome_ - LEIA-ME! rsrs); e por leiga geralmente queremos dizer qualquer pessoa que não
+participou do desenvolvimento do projeto. Daí a importancia de se ter tal documento, ainda que simplificado.
+
+Por isso nesse post trago algumas sugestões do que colocar num **README** de acordo com o objetivo do projeto.
+Vou usar como exemplo um blog de posts (parecido com este), isto é, um projeto que possui um _backend_ que persiste os dados (posts, no caso) e um _frontend_ que implementa a interface gráfica da aplicação.
+
+#### O mínimo
+
+O mínimo que se espera da documentação de um projeto é um **título** e uma **descrição**.
+Geralmente o _título_ vai ser o nome do seu projeto (tente elaborar um se não tiver) e a _descrição_
+deve pelo menos explicar do que se trata o projeto (motivação de seu desenvolvimento) e como pode ser usado.
+
+No nosso exemplo de blog, podemos dar o título de **Meu Blog** e como descrição algo como _"este é um blog pessoal pra falar de coisas diversas como tecnologia, culinária, ciência e outras coisas mais"_.
+
+#### Rodando Localmente
+
+Se quisermos que outras pessoas possam executar o projeto localmente, seja pra contribuir com melhorias ou pra simplesmente ver como o projeto funciona, por exemplo, é muito interessante ter uma seção **Rodando Localmente** no _README_ do seu projeto. Esta seção terá as instruções pra executá-lo em ambiente local.
+
+Tente separar esse processo em etapas e com todos os detalhes necessários pra que a aplicação seja executada sem problemas. Seguindo o nosso exemplo, poderíamos ter as seguintes etapas:
+
+1. Clone o repositório
+
+2. Instale as dependências necessárias
+
+> Por exemplo, se o projeto utiliza [Django](https://www.djangoproject.com/) no backend e [React](https://reactjs.org/) no frontend, então é necessário ter _python_ e _npm_ instalados na máquina
+
+3. Crie um arquivo `.env` com as variáveis de ambiente necessárias para rodar a aplicação (listar as variáveis de ambiente)
+
+4. Execute:
+
+```
+# para subir o backend (supondo uma aplicação Django)
+python manage.py runserver
+
+# para subir o frontend (supondo uma aplicação React)
+npm install
+
+npm start
+
+```
+
+Caso haja alguns _troubleshootings_ pra lidar com erros que podem surgir nesse processo, é sempre válido adicioná-los nessa seção também.
+
+#### Contribuindo
+
+No caso do projeto ser _open-source_, por exemplo, e aberto a contribuições, é bem importante explicar o passo a passo do processo de contribuição. Projetos que possuem uma boa documentação têm muito mais chance de receberem contribuições. Por outro lado, se é algum projeto da empresa em que você trabalha, essa seção também é muito importante porque é bem provável que num futuro próximo outros funcionários (que talvez nem tenham entrado na empresa ainda) participem do desenvolvimento do projeto.
+
+Além disso, dependendo de como o projeto está estruturado, é válido citar a estrutura de pastas e arquivos (olhando pela raiz do projeto). Por exemplo:
+
+- `backend/`
+- `frontend/`
+- `scripts`
+- `docker-compose files`
+- outros arquivos/pastas relevantes...
+
+> Alguns arquivos/pastas que geralmente já se assume que fazem parte dos projetos como `.gitignore` ou `package-lock.json` (para projetos npm) não são estritamente necessários de serem citados, mas sinta-se livre...documentação nunca é demais.
+
+Ainda sobre essa parte, é interessante também listar as principais tecnologias utilizadas (e com links pras suas documentações) para que quem for contribuir/desenvolver tenha pelo menos uma noção do que se precisa saber pra ter um desenvolvimento eficiente.
+
+No nosso caso teríamos:
+
+- [Django](https://www.djangoproject.com/)
+- [React](https://reactjs.org/)
+- [MySQL](https://www.mysql.com/)
+
+E por fim, caso o seu projeto siga alguns padrões de código, _design patterns_, etc...é legal também citar esse padrões pra que eles sejam seguidos e que também favoreçam o processo de desenvolvimento.
+
+> Em projetos médios/grandes, em que há muitas tecnologias e padrões envolvidos, é comum separar um arquivo só para falar desses detalhes de contribuição. Em geral, se dá a esse arquivo o nome de `CONTRIBUTING`.
+
+### Conclusão
+
+Estas foram então algumas dicas básicas para você começar a criar READMEs para os seus projetos ou complementar READMEs já existentes mas que não estejam tão completos. Talvez aquele projeto que você esperava receber mais contribuições precise ter uma documentação mais completa. Ou talvez aquele projeto que todo mundo na empresa tem problema pra rodar localmente, pudesse ter uma seção _troubleshooting_.
+
+No fim, o ponto que eu queria passar é que não existe um README padrão pra todos os projetos. Isso, como já foi dito, vai depender do tipo do projeto - se é uma biblioteca JavaScript ou um projeto pessoal, por exemplo.
+Porém essa estrutura básica de explicar um pouco sobre o projeto, como rodar localmente ou instalá-lo e como contribuir são pontos importantes e que devem sempre ter uma atenção especial. Segue algumas referências interessantes para se basear:
+
+- [Template simples](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
+- [Exemplo de README de um projeto pessoal](https://github.com/Projeto-ALES/ales-website)
+- [Alguns exemplos famosos](https://github.com/matiassingers/awesome-readme)
+
+Se você tem alguma sugestão pra esse post (ou até mesmo pra esse blog) você é mais do que bem-vindo para abrir uma _issue_ neste [repositório](https://github.com/vpalmerini/blog).
