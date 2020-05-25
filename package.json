@@ -2,6 +2,7 @@
   "name": "blog",
   "description": "Personal blog by Victor Palmerini",
   "version": "1.0.0",
+  "private": true,
   "main": "index.js",
   "author": "vpalmerini <victorpalmerini@gmail.com>",
   "license": "MIT",

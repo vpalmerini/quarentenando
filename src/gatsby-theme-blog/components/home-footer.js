@@ -3,8 +3,8 @@ import { Styled, css } from "theme-ui";
 
 const Footer = () => {
   const socialLinks = [
-    { name: "GitHub", url: "https://github.com/vpalmerini" },
-    { name: "LinkedIn", url: "https://www.linkedin.com/in/victorpalmerini/" },
+    { name: "github", url: "https://github.com/vpalmerini" },
+    { name: "linkedin", url: "https://www.linkedin.com/in/victorpalmerini/" },
   ];
 
   return (

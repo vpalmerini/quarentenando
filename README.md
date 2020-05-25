@@ -2,7 +2,7 @@
 
 ## Description
 
-This project is a personal blog built with [Gatsby](https://www.gatsbyjs.org/) and inspired by [Dan Abramov's Blog](https://overreacted.io/). It overrides some default styles and configurations like styles and theme (using [gatsby-blog-theme plugin](https://www.gatsbyjs.org/packages/gatsby-theme-blog/)).
+This project is a personal blog built with [Gatsby](https://www.gatsbyjs.org/) and inspired by [Dan Abramov's Blog](https://overreacted.io/). It overrides some default configurations like styles and theme (using [gatsby-blog-theme plugin](https://www.gatsbyjs.org/packages/gatsby-theme-blog/)).
 
 _Gatsby_ offers countless ways for feeding your UI with data. In this case, all posts are written as `.mdx` files, which is very convenient for developers.
 
