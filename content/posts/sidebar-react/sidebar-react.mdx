@@ -1,0 +1,527 @@
+---
+slug: "/sidebar-com-react"
+title: Criando uma SideBar com React
+date: "2020-05-27"
+---
+
+Recentemente precisei implementar um menu de navegação para um [PWA](https://web.dev/progressive-web-apps/). Como estava
+fazendo do zero, sem nenhuma biblioteca de UI como [Material](https://material-ui.com/) ou [Semantic](https://react.semantic-ui.com/),
+fui pesquisar alguns exemplos pra me basear. Porém, depois de alguma pesquisa, não encontrei nenhum exemplo bom
+e simples o suficiente para o que estava procurando. Daí a motivação de escrever este post detalhando como
+eu implementei uma `SideBar` responsiva com React e espero que possa ser útil para alguém :)
+
+[**Spoiler**] Segue aqui o componente pronto e funcional:
+
+![SideBar](./sidebar.gif "SideBar")
+
+### Criando o projeto
+
+Vamos criar um projeto React com o famoso [create-react-app](https://github.com/facebook/create-react-app) para
+fins práticos.
+
+Para criar o projeto, execute:
+
+```sh
+$ npx create-react-app sidebar-app
+```
+
+> `npx` é um _package runner_ que vem junto com o [Node](). Então tenha uma versão atualizada do _Node_ instalado.
+
+Entre na pasta `sidebar-app` e pronto! Temos uma base de um projeto React pronta pra ser customizada.
+
+> É interessante remover alguns arquivos que já vem no _create-react-app_ por padrão, como os logos na pasta `public`
+> e o arquivo `App.css` na pasta `src`. Não esqueça de fazer as correções necessárias no `App.js` e `index.html`.
+
+Agora inicie o servidor de desenvolvimento do [Webpack](https://webpack.js.org/) com o comando:
+
+```sh
+$ yarn start
+```
+
+Abra o navegador na rota `localhost:3000` e você deverá ter uma tela em branco.
+
+### Criando o componente SideBar
+
+Primeiro, crie uma pasta `components` dentro de `src` e depois uma pasta `SideBar`.
+
+> O path fica `src` -> `components` -> `SideBar`
+
+Dentro de `SideBar` fica a lógica e estilo do nosso componente.
+
+Começando pela lógica, crie o arquivo `SideBar.js` dentro de `SideBar` com a estrutura padrão de um
+componente React:
+
+```js
+// src/SideBar/SideBar.js
+import React from "react";
+
+const SideBar = () => {
+  return (
+    <nav>
+      <ul></ul>
+    </nav>
+  );
+};
+
+export default SideBar;
+```
+
+Pensando na estrutura do componente, nossa `Sidebar` vai ser basicamente um `<nav>` com uma lista de itens.
+Essa lista de itens na verdade será uma lista de um outro componente, o `SidebarItem`...mas nós vamos chegar lá.
+
+Agora vamos estilizar o componente. Aqui, seguirei a filosofia de [mobile first](https://www.moblee.com.br/blog/mobile-first-principais-vantagens/),
+isto é, o estilo sempre é aplicado pensando na visualização _mobile_ e então ajustado pra visualização _desktop_. E
+vou utilizar [variáveis CSS](https://developer.mozilla.org/pt-BR/docs/Web/CSS/var) por ser um recurso poderoso
+do _CSS_ e que hoje já possui um ótimo suporte nos principais navegadores. As variáveis serão importantes para
+armazenar, por exemplo, cores e espaçamento dos nossos componentes.
+
+Para as variáveis ficarem disponíveis por toda a aplicação, crie-as no arquivo `src/index.css` (já existente).
+
+```css
+/* src/index.css */
+:root {
+  --gray-dark: #37474f;
+
+  --sidebar-width: 80px;
+  --sidebar-height: 60px;
+
+  --sidebar-z-index: 1000;
+}
+```
+
+> Possivelmente já terá um código existente no arquivo, pode deixá-lo aí ou apagar se preferir.
+
+A propriedade `:root` faz com que todas as variáveis definidas ali fiquem disponíveis em todo o escopo `html`, ou seja,
+em toda a aplicação.
+
+Crie um arquivo `SideBar.css` no mesmo nível do `SideBar.js` com o seguinte código:
+
+```css
+/* src/components/SideBar/SideBar.css */
+.sideBarContainer {
+  background-color: var(--gray-dark);
+  width: 100vw;
+  position: fixed;
+  bottom: 0;
+  z-index: var(--sidebar-z-index);
+  box-shadow: var(--sidebar-shadow-mobile);
+}
+```
+
+Agora precisamos importá-lo no `SideBar.js` e atribuir essa classe a tag `<nav>`:
+
+```js
+// src/components/SideBar/SideBar.js
+import React from "react";
+
+import "./SideBar.css";
+
+const SideBar = () => {
+  return (
+    <nav className="sideBarContainer">
+      <ul></ul>
+    </nav>
+  );
+};
+
+export default SideBar;
+```
+
+E para visualizar o componente, importe-o no `App.js`:
+
+```js
+// src/App.js
+import React from "react";
+
+import SideBar from "./components/SideBar/SideBar";
+
+function App() {
+  return (
+    <div className="App">
+      <SideBar />
+    </div>
+  );
+}
+
+export default App;
+```
+
+Perceba que temos um detalhe pra resolver. Na visualização _desktop_ temos que fazer com que o componente apareça na
+vertical, pois por enquanto está na horizontal (igual o _mobile_).
+Para isso, vamos usar [media query](https://developer.mozilla.org/pt-BR/docs/Web/Guide/CSS/CSS_Media_queries), uma
+propriedade responsiva do _CSS_. Voltando então ao arquivo `SideBar.css`, adicione o seguinte bloco de código:
+
+```css
+/* src/components/SideBar/SideBar.css */
+@media only screen and (min-width: 1200px) {
+  .sideBarContainer {
+    width: var(--sidebar-width);
+    height: 100vh;
+    box-shadow: var(--sidebar-shadow-desktop);
+    transition: 300ms ease;
+  }
+
+  .sideBarContainer:hover {
+    width: 250px;
+  }
+}
+```
+
+Nosso componente tá tomando forma! \o/ Um detalhe bacana de adicionar, e que é bastante comum em
+componentes do tipo, seria um `overlay` no evento de _hover_, isto é, ao abrir a _SideBar_ o resto da tela
+fica com uma camada mais escura sobre, destacando a _SideBar_.
+
+Isso é simples de fazer. Para adicionar o _overlay_, crie uma tag `<div>` no componente `SideBar`:
+
+```js
+// src/components/SideBar/SideBar.js
+const SideBar = () => {
+  return (
+    <>
+      <div className="sideBarOverlay"></div>
+      <nav className="sideBarContainer">
+        <ul></ul>
+      </nav>
+    </>
+  );
+};
+```
+
+> Perceba que tivemos que colocar tudo dentro de uma tag `<>`. Esse é um componente default do _React_ que eles
+> chamam de [Fragment](https://reactjs.org/docs/fragments.html). É útil quando não se quer colocar tudo dentro de
+> um `<div>`, já que o _React_ não aceita que o componente tenha 2 ou mais _tags_ no mesmo nível.
+
+E no arquivo `SideBar.css` adicione a classe:
+
+```css
+/* src/components/SideBar/SideBar.css */
+@media only screen and (min-width: 1200px) {
+  .sideBarOverlay {
+    position: fixed;
+    height: 100vh;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: var(--sidebar-z-index);
+    transition: 200ms ease;
+  }
+}
+```
+
+![SideBar Simples](./sidebar-simple.gif "SideBar Simple")
+
+Sucesso! Temos um _overlay_. Perceba, porém, que dessa maneira o _overlay_ é sempre aplicado, ao invés de aplicarmos ele apenas
+no _hover_ da _SideBar_. Para isso, tal tratamento tem que ser feito no próprio componente, pois o _CSS_ não consegue lidar
+com a lógica de "se há hover nesse elemento aplique um estilo em outro elemento". Esse tipo de tratamento tem
+que ser feito com _JavaScript_.
+
+Uma coisa bem poderosa que as versões mais recentes do React (a partir da [versão 16.8](https://github.com/facebook/react/releases)
+pra ser mais exato) adicionou foram os [hooks](https://reactjs.org/docs/hooks-overview.html). Os _hooks_ permitem que a gente reutilize
+lógicas comuns como funções.
+
+Aqui, vou criar um _hook_ pro evento de _hover_. É um _hook_ que só vai ser utilizado no componente `SideBar` mas que poderia
+tranquilamente ser usado em qualquer outro componente da aplicação.
+
+Crie então uma pasta `hooks/` dentro de `src/` e adicione o arquivo `useHover.js` com o seguinte código:
+
+```js
+// src/hooks/useHover.js
+import { useRef, useState, useEffect } from "react";
+
+const useHover = () => {
+  const [value, setValue] = useState(false);
+
+  const ref = useRef(null);
+
+  const handleMouseOver = () => setValue(true);
+  const handleMouseOut = () => setValue(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (node) {
+      node.addEventListener("mouseover", handleMouseOver);
+      node.addEventListener("mouseout", handleMouseOut);
+
+      return () => {
+        node.removeEventListener("mouseover", handleMouseOver);
+        node.removeEventListener("mouseout", handleMouseOut);
+      };
+    }
+  }, []);
+
+  return [ref, value];
+};
+
+export default useHover;
+```
+
+Esse _hook_ vai nos retornar um valor e uma referência. O valor é um _booleano_ que tem valor `true`
+no hover e `falso` caso contrário. A referência é o elemento que queremos usar como referência pro
+evento de _hover_. Vamos usá-lo então no nosso componente. Para isso, basta importá-lo e aplicar a lógica
+de _hover_ na tag do _overlay_:
+
+```js
+// src/components/SideBar/SideBar.js
+...
+import useHover from "../../hooks/useHover";
+
+const SideBar = () => {
+  const [hoverRef, isHovered] = useHover();
+  ...
+
+  return (
+    <>
+      <div className={`${isHovered ? "sideBarOverlay" : null}`}></div>
+      <nav className="sideBarContainer" ref={hoverRef}>
+      ...
+```
+
+> Se _isHovered_ nos retorna `true`, então aplique o estilo de _overlay_, senão não aplique nenhum estilo.
+
+Considere nosso componente `SideBar` pronto. "Mas e no mobile?! O componente nem altura tem..."
+Calma jovem, nosso componente vai ganhar altura assim que colocarmos coisas nele. E essas coisas são instâncias
+do componente `SideBarItem`.
+
+### Criando o componente SideBarItem
+
+Precisamos agora criar os elementos da lista contida no componente _SideBar_. Eu vou chamar esses elementos
+de _SideBarItem_ e eles também serão um componente _React_.
+
+Esse componente, basicamente, será um `<li>` com um _ícone_, um _texto_ (na visualização _desktop_) e um _link_.
+Crie então a pasta `SideBarItem` (dentro de `components`) com o arquivo `SideBarItem.js` e este com a
+seguinte estrutura:
+
+```js
+import React from "react";
+
+const SideBarItem = ({ icon, text, to }) => {
+  return (
+    <li className="itemContainer">
+      <a className="itemLink" href={to}>
+        <div>
+          <span>
+            <i className={icon}></i>
+          </span>
+        </div>
+        <div className="itemText">
+          <span>{text}</span>
+        </div>
+      </a>
+    </li>
+  );
+};
+
+export default SideBarItem;
+```
+
+Então nosso componente recebe como _props_ um ícone, um _text_ e um _link_. Para os ícones, utilizaremos a
+biblioteca [Font Awesome](https://fontawesome.com/icons?d=gallery), que nos disponibiliza alguns ícones
+gratuitamente.
+
+Existem várias maneiras de usar o _Font Awewome_. A maneira que eu achei mais conveniente, pois envolve
+menos código, foi a de acessar o kit de ícones via CDN. Porém, esta maneira pode ser um pouco chata por
+necessitar criar uma conta no site do _Font Awesome_. Caso queira seguir dessa maneira, acesse
+[aqui](https://fontawesome.com/start) pra se cadastrar. Uma outra maneira é instalar os pacotes oficiais _yarn_ ou
+_npm_ a partir deste [repositório](https://github.com/FortAwesome/react-fontawesome).
+
+Seguindo então com o CDN, após o cadastro o _Font Awesome_ irá te fornecer um link pra ser referenciado
+no arquivo `public/index.html`. Apenas coloque o link neste arquivo como:
+
+```html
+<head>
+  ...
+  <script src="{link}" crossorigin="anonymous"></script>
+</head>
+```
+
+Feito isso, agora podemos usar a tag `<i>` com a classe associada a algum ícone do _Font Awesome_ para
+gerarmos um ícone no nosso componente.
+
+> Esta classe é a props _icon_ do componente _SideBarItem_
+
+Precisamos agora estilizar minimamente nosso componente. Por enquanto ele tem as classes _itemContainer_,
+_itemLink_ e _itemText_. Para isso, crie um arquivo `SideBarItem.css` na pasta do componente com o
+seguinte conteúdo:
+
+```css
+.itemLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: var(--sidebar-item-height);
+  border-radius: 4px;
+  transition: 0.2s ease;
+  margin: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #fff;
+}
+
+.itemLink:hover {
+  background-color: var(--gray-darkest);
+}
+
+.itemText {
+  display: none;
+}
+```
+
+> As propriedades _text-decoration_, _font-weight_ e _color_ serão aplicadas ao texto que aparecerá no _hover_.
+
+> Basicamente alinhamos os itens (ícone e texto) na horizontal e setamos uma altura (pensando na visualização
+> _mobile_).
+
+> Não esqueça de importar os estilos no componente:
+> `import "./SideBarItem.css";`
+
+Perceba também que adicionamos mais algumas variáveis CSS. Portanto, atualize o arquivo `index.css` com elas:
+
+```css
+/* src/index.css */
+:root {
+  ...
+  --gray-darkest: #222b2f;
+  ...
+  --sidebar-item-height: 50px;
+  --sidebar-item-height-desktop: 70px;
+```
+
+Vamos testar então o componente e ver se esses estilos precisam de algum ajuste ou não. A _SideBar_ desse
+exemplo possui 4 itens, mas pode ter mais ou menos de acordo com a necessidade. Para ficar uma estrutura
+flexível, crie um arquivo pra armazenar esses itens. No meu caso, vou criar na mesma pasta do componente
+_SideBar_:
+
+```js
+// src/components/SideBar/items.js
+const items = [
+  { id: 1, text: "Home", icon: "fas fa-home", to: "/" },
+  {
+    id: 2,
+    text: "Localização",
+    icon: "fas fa-map-marked-alt",
+    to: "/localizacao",
+  },
+  { id: 3, text: "Contato", icon: "fas fa-paper-plane", to: "/contato" },
+  { id: 4, text: "Entrar", icon: "fa fa-sign-in", to: "/login" },
+];
+
+export default items;
+```
+
+Agora importe e renderize esses itens no componente _SideBar_:
+
+```js
+// src/components/SideBar/SideBar.js
+...
+import SideBarItem from "../SideBarItem/SideBarItem";
+import items from "./items";
+
+
+const SideBar = () => {
+  ...
+  <ul>
+    {items.map((item) => {
+      return (
+        <SideBarItem
+          key={item.id}
+          text={item.text}
+          icon={item.icon}
+          to={item.to}
+        />
+      );
+    })}
+  </ul>
+```
+
+Tá chegando! Agora precisamos fazer uns ajustes. Primeiro, perceba que os itens estão na vertical na
+visualização _mobile_. Além disso, a lista de ícones está com o estilo padrão da tag `<ul>`. Vamos arrumar isso.
+No arquivo `SideBar.css`, adicione os estilos:
+
+```css
+/* src/components/SideBar/SideBar.css */
+
+.sideBarList {
+  display: flex;
+  justify-content: space-around;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media only screen and (min-width: 1200px) {
+  ...
+  .sideBarList {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--spacing-medium);
+  }
+```
+
+E adicione a classe na tag `<ul>`:
+
+```js
+// src/components/SideBar/SideBar.js
+...
+<ul className="sideBarList">
+  {items.map((item) => {
+...
+```
+
+Parece quase pronto agora. Um detalhe importante, é que a área clicável/tocável do ícone na visualização _mobile_
+está muito pequena. Para aumentar essa área, apenas faça com que o _container_ do `<li>` ocupe todo o espaço
+disponível. Isso é facilmente alcançado adicionando:
+
+```css
+/* src/components/SideBarItem/SideBarItem.css */
+.itemContainer {
+  flex: 1;
+}
+...
+```
+
+E por último (ufa!), precisamos adicionar o texto na visualização _desktop_ e no evento de _hover_.
+Um jeito possível de fazer isso é adicionar dinamicamente uma classe `CSS` no evento de _hover_ a partir do
+nosso hook `useHover`. O componente pai `SideBar` já utiliza ele, e como queremos que o texto de todos os itens
+apareçam ao mesmo tempo, passaremos esse evento como uma _props_ pros componentes `SideBarItem`.
+
+Então no componente `SideBar`:
+
+```js
+// src/components/SideBar/SideBar.js
+<SideBarItem
+  ...
+  hover={isHovered}
+/>
+```
+
+> Não esqueça de adicionar a props no componente filho _SideBarItem_
+
+Criando a classe _CSS_:
+
+```css
+/* src/components/SideBarItem/SideBarItem.css */
+@media only screen and (min-width: 1200px) {
+  .itemTextHover {
+    display: block;
+    width: 50%;
+  }
+}
+```
+
+> A propriedade _width_ aqui serve pra deixar os textos e ícones alinhados entre si
+
+E agora adicione a classe dinamicamente:
+
+```js
+// src/components/SideBarItem/SideBarItem.js
+...
+  <div className={`itemText ${hover ? `itemTextHover` : null}`}>
+    <span>{text}</span>
+  </div>
+...
+```
+
+E pronto! \o/ Temos uma `SideBar` no _desktop_ e uma `AppBar` no _mobile_, tudo no mesmo componente :)
+
+Para ver o código completo, acesse este [repositório](https://github.com/vpalmerini/sidebar).
+
+E se você tem alguma sugestão pra esse post (ou até mesmo pra esse blog) você é mais do que bem-vindo para abrir uma _issue_ neste [repositório](https://github.com/vpalmerini/blog).
