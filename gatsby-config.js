@@ -10,6 +10,15 @@ module.exports = {
         icon: "content/assets/avatar.png",
       },
     },
+    {
+      resolve: `gatsby-plugin-google-analytics`,
+      options: {
+        trackingId: "UA-117987159-3",
+        head: true,
+        pageTransitionDelay: 0,
+        defer: false,
+      },
+    },
   ],
   siteMetadata: {
     title: "Quarentenando",
