@@ -1,0 +1,178 @@
+---
+slug: "/introduzindo-o-babel"
+title: Por que precisamos do Babel?
+date: "2020-09-15"
+---
+
+Se você já mexeu pelo menos um pouquinho com desenvolvimento web, então com certeza já ouviu falar ou até já configurou o **Babel** em um projeto _JavaScript_.
+Mas afinal, pra que serve o **Babel**? E que raios ele tem a ver com o **webpack**?
+
+Antes de começar a falar sobre o Babel de fato, primeiro é interessante entender o problema na web que ele tenta resolver.
+Como você deve saber, os navegadores "entendem" _JavaScript_, e como toda linguagem, o _JavaScript_ possui diferentes versões. De tempos em tempos novas versões são lançadas.
+E esse "de tempos em tempos" virou um _anualmente_ a partir de 2015, quando foi lançada a versão 6 do ECMAScript (especificação do _JavaScript_), mais conhecida como ES6 ou ES2015.
+
+Tal versão trouxe grandes mudanças na linguagem em relação às versões anteriores e não só isso, o órgão responsável por lançar essas mudanças, o [TC39](https://tc39.es/),
+adotou o hábito de lançar uma nova versão do _JavaScript_ (a partir de 2015) anualmente. Beleza, mas o que isso tem a ver com o Babel? Calma, vamos chegar lá.
+
+Bom, imagine esse cenário em que uma nova versão do _JavaScript_, com novas features e especificações, é lançada todo ano.
+Os navegadores que lutem, não é mesmo? Pois é isso o que vem acontecendo. Os navegadores em geral têm dificuldade pra acompanhar esse avanço da linguagem, e por isso muitas
+das features do _JavaScript_ recém-lançadas acabam demorando pra obter um suporte razoável dos navegadores (IE11 que o diga rsrs).
+Além disso, o ciclo de releases dos navegadores e também as engines que eles utilizam são diferentes entre si. Tudo isso influencia no suporte que um navegador pode oferecer em um determinado momento.
+
+Esse é o problema que o Babel vem pra resolver \o/
+Basicamente ele permite que a gente use essas novas features mais recentes do _JavaScript_ sem perder o suporte do nosso código pra versões não tão recentes dos navegadores.
+No fundo, o que acontece é um processo de transpilação, isto é, o código _JavaScript_ moderno é transformado para um código _JavaScript_ não tão moderno, mas que tem um suporte bem maior.
+Mais sobre transpilação [aqui](https://pt.stackoverflow.com/questions/189894/o-que-%C3%A9-transpila%C3%A7%C3%A3o).
+
+Pra mostrar que isso realmente funciona e que eu não tô enganando você, vou fazer um exemplo prático.
+O que eu vou fazer, basicamente, vai ser pegar um código _JavaScript_ com features recentes e servir esse código de entrada pro Babel transpilar e gerar um novo código como saída.
+Bora ver se dá certo.
+
+A primeira coisa que eu vou fazer é criar uma pasta pro nosso projeto de exemplo e iniciá-lo como um repositório [npm](https://www.npmjs.com/get-npm).
+
+> O npm é um gerenciador de pacotes JavaScript e vem junto com o [Node](https://nodejs.org/pt-br/).
+
+O meu projeto vai ser instanciar doguinhos! 🐶🐕
+
+```sh
+# crio a pasta e entro nela
+$ mkdir dogs && cd dogs
+
+# inicio o repositório npm
+$ npm init -y
+```
+
+Agora posso criar um arquivo _JavaScript_ pra implementar a classe `Dog` e criar instâncias!
+
+```js
+// Dog.js
+class Dog {
+  constructor(name, breed) {
+    this.name = name;
+    this.breed = breed; // "breed" é raça em inglês rsrs
+  }
+
+  printDog() {
+    console.log(`${this.name} é da raça ${this.breed}`);
+  }
+}
+
+const greg = new Dog("Greg", "Vira-lata");
+greg.printDog();
+```
+
+Pra executar e mostrar que o código funciona, basta fazer:
+
+```sh
+node Dog.js
+# "Greg é da raça Vira-lata"
+```
+
+Perceba que nesse código estamos utilizando algumas features recentes do _JavaScript_, como [classes](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Classes),
+[template-strings](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/template_strings) e [const](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Statements/const).
+
+E por que o Node entende essas features?! Basicamente porque ele usa a mesma engine do Google Chrome, a [V8](https://medium.com/reactbrasil/como-o-javascript-funciona-dentro-da-engine-v8-5-dicas-sobre-como-escrever-c%C3%B3digo-otimizado-e05af6088fd5),
+que de modo geral é a engine com maior suporte pro _JavaScript_ hoje.
+Na [documentação do Node](https://nodejs.org/pt-br/docs/es6/), eles explicam um pouquinho melhor sobre isso.
+
+Bom, beleza! Temos nosso código "moderno". Bora transpilar ele com a ajuda do Babel.
+Pra isso, precisamos instalar alguns pacotes. São eles:
+
+- [@babel/core](https://babeljs.io/docs/en/babel-core)
+- [@babel/cli](https://babeljs.io/docs/en/babel-cli)
+- [@babel/plugin-transform-classes](https://babeljs.io/docs/en/babel-plugin-transform-classes)
+- [@babel/plugin-transform-template-literals](https://babeljs.io/docs/en/babel-plugin-transform-template-literals)
+- [@babel/plugin-transform-block-scoping](https://babeljs.io/docs/en/babel-plugin-transform-block-scoping)
+
+> @babel/core é o pacote base do Babel e @babel/cli é o pacote que permite que a gente execute comandos do Babel pelo _terminal_
+
+> Os outros pacotes são o que a gente pode chamar de _plugins_ do Babel e cada plugin faz uma transformação específica.
+> Então, por exemplo, o pacote `@babel/plugin-transform-classes` transforma classes do ES6+ (que estamos usando no nosso código) pra funções construtoras (possuem maior suporte nos navegadores).
+
+```sh
+npm install --save-dev @babel/core \
+                       @babel/cli \
+                       @babel/plugin-transform-classes \
+                       @babel/plugin-transform-template-literals \
+                       @babel/plugin-transform-block-scoping
+```
+
+Após isso, o seu `package.json` deve estar mais ou menos assim:
+
+```json
+// package.json
+...
+{
+    "devDependencies": {
+      "@babel/cli": "^7.11.6",
+      "@babel/core": "^7.11.6",
+      "@babel/plugin-transform-block-scoping": "^7.11.1",
+      "@babel/plugin-transform-classes": "^7.10.4",
+      "@babel/plugin-transform-template-literals": "^7.10.5"
+  }
+}
+```
+
+Só uma coisa antes de finalmente transpilarmos o código. Precisamos indicar pro Babel quais plugins ele deve usar na transpilação.
+Pra isso, basta criar o arquivo `.babelrc` com o seguinte código:
+
+```json
+// .babelrc
+{
+  "plugins": [
+    "@babel/plugin-transform-classes",
+    "@babel/plugin-transform-template-literals",
+    "@babel/plugin-transform-block-scoping"
+  ]
+}
+```
+
+E agora o grande momento de transpilar o nosso código \o/ É só fazer:
+
+```sh
+npx babel Dog.js --out-file Dog-old.js
+```
+
+> O Babel recebe `Dog.js` como entrada e gera `Dog-old.js` como saída
+
+> A flag `--out-file` é necessária se você quiser gerar a saída em outro arquivo, senão a saída vai ser pelo console mesmo
+
+E agora vemos que o código _JavaScript_ "antigo" é bem diferente do que o que escrevemos. Será que ele funciona?!
+Pra testar, é só executar ele com o Node:
+
+```sh
+node Dog-old.js
+# "Greg é da raça Vira-lata"
+```
+
+E voilá! O código se mantém funcional, como deveria ser. Esse é o grande poder do Babel! (e de outros transpiladores da comunidade).
+
+E antes de encerrar o post, tem uma dica muito importante que você deve saber.
+Quando instalamos os pacotes, tivemos que analisar feature por feature e instalar um _plugin_ pra cada uma, certo?
+O nosso código aqui é pequeno. Mas imagine um código extenso, com vários arquivos, por exemplo...teria que instalar plugin por plugin??
+A resposta é **não!** Pra resolver isso, existem pacotes pré-configurados que já vêm com vários desses plugins instalados. Podemos citar:
+
+- [@babel/preset-env](https://babeljs.io/docs/en/babel-preset-env)
+- [@babel/preset-react](https://babeljs.io/docs/en/babel-preset-react) - _código React_
+- [@babel/preset-typescript](https://babeljs.io/docs/en/babel-preset-typescript) - _código TypeScript_
+
+E aí pra usá-los, basta instalar igual os plugins. No caso do nosso projeto, ficaria:
+
+```sh
+npm install --save-dev @babel/core \
+                       @babel/cli \
+                       @babel/preset-env
+```
+
+E no arquivo `.babelrc`, ao invés de referenciarmos _plugins_, agora referenciamos _presets_:
+
+```json
+{
+  "presets": ["@babel/preset-env"]
+}
+```
+
+Bem mais simples né! E aí é só rodar o Babel e ver que tudo está funcionando do mesmo jeito \o/
+
+Muito em breve vou fazer um post específico sobre o [webpack](https://webpack.js.org/) e tentar explicar que raios o Babel tem a ver com ele.
+Até lá! 👋
